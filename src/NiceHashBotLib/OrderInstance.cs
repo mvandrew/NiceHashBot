@@ -191,7 +191,7 @@ namespace NiceHashBotLib
 
             // Change limit if requested by user.
             double __targetSpeed = StartLimit;
-            if (MinimalPrice - MyOrder.Price < APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 3.0)
+            if (MinimalPrice - MyOrder.Price < APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 5.0)
                 __targetSpeed = APIWrapper.MINIMAL_LIMIT[MyOrder.Algorithm];
             if (MyOrder.SpeedLimit != __targetSpeed)
             {
@@ -232,7 +232,7 @@ namespace NiceHashBotLib
 
                 if (TotalWantedSpeed > TotalSpeed) break;*/
 
-                if (AllOrders[i].Speed > 0 && AllOrders[i].Workers > 0)
+                if (AllOrders[i].Speed > 0 && AllOrders[i].Workers > 0 && AllOrders[i].OrderType == 0)
                 {
                     __lastActiveOrderPrice = __lastActiveOrderPrice <= 0 ? AllOrders[i].Price : Math.Min(__lastActiveOrderPrice, AllOrders[i].Price);
                 }
@@ -268,7 +268,7 @@ namespace NiceHashBotLib
             // Определяем границы повышения цены
             double __newPrice = MaxPrice >= MinimalPrice ? MinimalPrice : MaxPrice;
             int __steps = (int)Math.Floor((__newPrice - MyOrder.Price) / (APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * (-1)));
-            if (__steps > 3 && __steps < 10)
+            if (__steps > 3 && __steps < 20)
                 __newPrice = MyOrder.Price - APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 3.0;
 
             if (__newPrice != MyOrder.Price)
