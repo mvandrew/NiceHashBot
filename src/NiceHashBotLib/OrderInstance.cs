@@ -21,6 +21,7 @@ namespace NiceHashBotLib
         private double StartingPrice;
         private double StartingAmount;
         private DateTime DecreaseTime;
+        private DateTime IncreaseTime;
 
         #endregion
 
@@ -49,6 +50,7 @@ namespace NiceHashBotLib
             StartingPrice = Price;
             StartingAmount = Amount;
             DecreaseTime = DateTime.Now - APIWrapper.PRICE_DECREASE_INTERVAL;
+            IncreaseTime = DateTime.Now - APIWrapper.PRICE_INCREASE_INTERVAL;
 
             OrderThread = new Thread(ThreadRun);
             OrderThread.Start();
@@ -189,7 +191,7 @@ namespace NiceHashBotLib
 
             // Change limit if requested by user.
             double __targetSpeed = StartLimit;
-            if (MinimalPrice - MyOrder.Price < APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 3)
+            if (MinimalPrice - MyOrder.Price < APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 3.0)
                 __targetSpeed = APIWrapper.MINIMAL_LIMIT[MyOrder.Algorithm];
             if (MyOrder.SpeedLimit != __targetSpeed)
             {
@@ -216,24 +218,32 @@ namespace NiceHashBotLib
 
         private double GetMinimalNeededPrice(Order[] AllOrders, double TotalSpeed)
         {
-            double TotalWantedSpeed = 0;
+            //double TotalWantedSpeed = 0;
             int i;
+            double __lastActiveOrderPrice = -1;
             //double Multi = 1;
             //if (Algorithm == 1) Multi = 1000;
             for (i = 0; i < AllOrders.Length; i++)
             {
-                if (AllOrders[i].SpeedLimit == 0)
+                /*if (AllOrders[i].SpeedLimit == 0)
                     TotalWantedSpeed += 1000000000;
                 else
                     TotalWantedSpeed += AllOrders[i].SpeedLimit / APIWrapper.ALGORITHM_MULTIPLIER[Algorithm];
 
-                if (TotalWantedSpeed > TotalSpeed) break;
+                if (TotalWantedSpeed > TotalSpeed) break;*/
+
+                if (AllOrders[i].Speed > 0 && AllOrders[i].Workers > 0)
+                {
+                    __lastActiveOrderPrice = __lastActiveOrderPrice <= 0 ? AllOrders[i].Price : Math.Min(__lastActiveOrderPrice, AllOrders[i].Price);
+                }
             }
 
-            if (i == AllOrders.Length)
+            /*if (i == AllOrders.Length)
                 i = AllOrders.Length - 1;
 
-            return (AllOrders[i].Price + 0.0001);
+            return (AllOrders[i].Price + 0.0001);*/
+            __lastActiveOrderPrice = Math.Round(__lastActiveOrderPrice + 0.0001, 4);
+            return __lastActiveOrderPrice;
         }
 
 
@@ -250,9 +260,29 @@ namespace NiceHashBotLib
             }
 
             // Do not increase price, if we already have price higher or equal compared to minimal price.
-            if (MyOrder.Price >= (MinimalPrice - 0.00001)) return false;
+            if (MyOrder.Price >= (MinimalPrice - 0.0001)) return false;
 
-            if (MaxPrice >= MinimalPrice)
+            // Check time if decrase is possible.
+            if (IncreaseTime + APIWrapper.PRICE_INCREASE_INTERVAL > DateTime.Now) return true;
+
+            // Определяем границы повышения цены
+            double __newPrice = MaxPrice >= MinimalPrice ? MinimalPrice : MaxPrice;
+            int __steps = (int)Math.Floor((__newPrice - MyOrder.Price) / (APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * (-1)));
+            if (__steps > 3 && __steps < 10)
+                __newPrice = MyOrder.Price - APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 3.0;
+
+            if (__newPrice != MyOrder.Price)
+            {
+                LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO,
+                    "Setting price order #" + MyOrder.ID + " to " + __newPrice.ToString("F4"));
+                double NewP = MyOrder.SetPrice(__newPrice);
+                if (NewP > 0) MyOrder.Price = NewP;
+            }
+
+            IncreaseTime = DateTime.Now;
+            return true;
+
+            /*if (MaxPrice >= MinimalPrice)
             {
                 // We can set higher price.
                 LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO, "Setting price order #" + MyOrder.ID + " to " + MinimalPrice.ToString("F4"));
@@ -271,7 +301,7 @@ namespace NiceHashBotLib
                 return true;
             }
 
-            return false;
+            return false; */
         }
 
 
