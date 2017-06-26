@@ -198,12 +198,12 @@ namespace NiceHashBotLib
             }
 
             // Check if refill is needed.
-            /*if (MyOrder.BTCAvailable <= 0.003)
+            if (MyOrder.BTCAvailable <= 0.001)
             {
                 LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO, "Refilling order #" + MyOrder.ID);
                 if (MyOrder.Refill(0.01))
                     MyOrder.BTCAvailable += 0.01;
-            }*/
+            }
 
             // Do not adjust price, if order is dead.
             if (!MyOrder.Alive) return;
