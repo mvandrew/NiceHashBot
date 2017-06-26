@@ -288,7 +288,8 @@ namespace NiceHashBotLib
                 if (NewP > 0)
                 {
                     MyOrder.Price = NewP;
-                    LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO, "Decreasing price order #" + MyOrder.ID + " to " + NewP.ToString("F4"));
+                    LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO, 
+                        "Decreasing price order #" + MyOrder.ID + " to " + NewP.ToString("F4") + " (" + MinimalPrice.ToString("F4") + ")");
                     DecreaseTime = DateTime.Now;
                 }
             }
