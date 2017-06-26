@@ -189,7 +189,7 @@ namespace NiceHashBotLib
 
             // Change limit if requested by user.
             double __targetSpeed = StartLimit;
-            if (MyOrder.Price - MinimalPrice > 0.0005)
+            if (MinimalPrice - MyOrder.Price < APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 5)
                 __targetSpeed = APIWrapper.MINIMAL_LIMIT[MyOrder.Algorithm];
             if (MyOrder.SpeedLimit != __targetSpeed)
             {
