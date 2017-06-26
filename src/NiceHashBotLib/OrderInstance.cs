@@ -185,26 +185,30 @@ namespace NiceHashBotLib
 
         private void ProcessMyOrder(Order MyOrder, Order[] AllOrders, double TotalSpeed)
         {
+            double MinimalPrice = GetMinimalNeededPrice(AllOrders, TotalSpeed);
+
             // Change limit if requested by user.
-            if (MyOrder.SpeedLimit != StartLimit)
+            double __targetSpeed = StartLimit;
+            if (MyOrder.Price - MinimalPrice > 0.0005)
+                __targetSpeed = APIWrapper.MINIMAL_LIMIT[MyOrder.Algorithm];
+            if (MyOrder.SpeedLimit != __targetSpeed)
             {
-                LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO, "Changing limit order #" + MyOrder.ID + " to " + StartLimit.ToString("F2"));
-                MyOrder.SetLimit(StartLimit);
+                LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO, "Changing limit order #" + MyOrder.ID + " to " + __targetSpeed.ToString("F2"));
+                MyOrder.SetLimit(__targetSpeed);
             }
 
             // Check if refill is needed.
-            if (MyOrder.BTCAvailable <= 0.003)
+            /*if (MyOrder.BTCAvailable <= 0.003)
             {
                 LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO, "Refilling order #" + MyOrder.ID);
                 if (MyOrder.Refill(0.01))
                     MyOrder.BTCAvailable += 0.01;
-            }
+            }*/
 
             // Do not adjust price, if order is dead.
             if (!MyOrder.Alive) return;
 
             // Adjust price.
-            double MinimalPrice = GetMinimalNeededPrice(AllOrders, TotalSpeed);
             if (!IncreasePrice(MyOrder, AllOrders, MinimalPrice))
                 DecreasePrice(MyOrder, AllOrders, MinimalPrice);
         }
