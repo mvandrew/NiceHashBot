@@ -271,16 +271,18 @@ namespace NiceHashBotLib
             if (__steps > 3 && __steps < 20)
                 __newPrice = MyOrder.Price - APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 3.0;
 
-            if (__newPrice != MyOrder.Price)
+            if (__newPrice > MyOrder.Price)
             {
                 LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO,
                     "Setting price order #" + MyOrder.ID + " to " + __newPrice.ToString("F4"));
                 double NewP = MyOrder.SetPrice(__newPrice);
                 if (NewP > 0) MyOrder.Price = NewP;
+
+                IncreaseTime = DateTime.Now;
+                return true;
             }
 
-            IncreaseTime = DateTime.Now;
-            return true;
+            return false;
 
             /*if (MaxPrice >= MinimalPrice)
             {
