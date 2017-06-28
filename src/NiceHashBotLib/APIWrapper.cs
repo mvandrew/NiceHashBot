@@ -66,6 +66,11 @@ namespace NiceHashBotLib
         public static TimeSpan PRICE_INCREASE_INTERVAL;
 
         /// <summary>
+        /// Price incrase interval.
+        /// </summary>
+        public static TimeSpan SPEED_CHANGE_INTERVAL;
+
+        /// <summary>
         /// API ID.
         /// </summary>
         public static string APIID;
@@ -150,6 +155,7 @@ namespace NiceHashBotLib
 
             PRICE_DECREASE_INTERVAL = new TimeSpan(0, 0, R.Data.DownStepTime);
             PRICE_INCREASE_INTERVAL = new TimeSpan(0, 0, 60);
+            SPEED_CHANGE_INTERVAL = new TimeSpan(0, 0, 120);
             ALGORITHM_NAME = new string[R.Data.Algorithms.Length];
             PRICE_DECREASE_STEP = new double[R.Data.Algorithms.Length];
             ALGORITHM_MULTIPLIER = new double[R.Data.Algorithms.Length];

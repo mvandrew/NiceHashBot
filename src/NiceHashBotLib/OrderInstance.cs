@@ -22,6 +22,7 @@ namespace NiceHashBotLib
         private double StartingAmount;
         private DateTime DecreaseTime;
         private DateTime IncreaseTime;
+        private DateTime SpeedTime;
 
         #endregion
 
@@ -51,6 +52,7 @@ namespace NiceHashBotLib
             StartingAmount = Amount;
             DecreaseTime = DateTime.Now - APIWrapper.PRICE_DECREASE_INTERVAL;
             IncreaseTime = DateTime.Now - APIWrapper.PRICE_INCREASE_INTERVAL;
+            SpeedTime = DateTime.Now - APIWrapper.SPEED_CHANGE_INTERVAL;
 
             OrderThread = new Thread(ThreadRun);
             OrderThread.Start();
@@ -193,10 +195,12 @@ namespace NiceHashBotLib
             double __targetSpeed = StartLimit;
             if (MinimalPrice - MyOrder.Price < APIWrapper.PRICE_DECREASE_STEP[MyOrder.Algorithm] * 5.0)
                 __targetSpeed = APIWrapper.MINIMAL_LIMIT[MyOrder.Algorithm];
-            if (MyOrder.SpeedLimit != __targetSpeed)
+            if (MyOrder.SpeedLimit != __targetSpeed && SpeedTime + APIWrapper.SPEED_CHANGE_INTERVAL < DateTime.Now)
             {
                 LibConsole.WriteLine(LibConsole.TEXT_TYPE.INFO, "Changing limit order #" + MyOrder.ID + " to " + __targetSpeed.ToString("F2"));
                 MyOrder.SetLimit(__targetSpeed);
+                if (__targetSpeed == APIWrapper.MINIMAL_LIMIT[MyOrder.Algorithm])
+                    SpeedTime = DateTime.Now;
             }
 
             // Check if refill is needed.
